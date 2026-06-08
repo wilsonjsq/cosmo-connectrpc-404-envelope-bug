@@ -1,0 +1,31 @@
+version: "1"
+
+listen_addr: "0.0.0.0:3002"
+
+execution_config:
+  file:
+    path: "/etc/router/execution-config.json"
+
+log_level: "info"
+
+traffic_shaping:
+  all:
+    request_timeout: 30s
+
+# ConnectRPC handler under test. Filesystem services storage discovers the
+# proto + co-located .graphql operations under /etc/router/services/<dir>/.
+# Only routes registered in the descriptor of an discovered service are
+# handled — all others fall through to vanguard's unknownHandler, which
+# (without WithUnknownHandler) returns a bare http.NotFound.
+connect_rpc:
+  enabled: true
+  server:
+    listen_addr: "0.0.0.0:5026"
+  storage:
+    provider_id: "fs-services"
+  graphql_endpoint: "http://localhost:3002/graphql"
+
+storage_providers:
+  file_system:
+    - id: "fs-services"
+      path: "/etc/router/services"

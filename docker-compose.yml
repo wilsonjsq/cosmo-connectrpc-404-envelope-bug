@@ -1,0 +1,33 @@
+# Self-contained reproduction stack. Two services on a private bridge
+# network: a mock GraphQL subgraph and the stock Cosmo Router. No external
+# deps (no controlplane, no Cosmo Cloud, no Postgres, no Redis).
+
+services:
+  subgraph:
+    image: node:22-alpine
+    working_dir: /app
+    command: node subgraph-server.mjs
+    volumes:
+      - ./subgraph-server.mjs:/app/subgraph-server.mjs:ro
+      - ./subgraph.graphql:/app/subgraph.graphql:ro
+    environment:
+      - PORT=4001
+    expose:
+      - "4001"
+
+  router:
+    image: ghcr.io/wundergraph/cosmo/router:latest
+    depends_on:
+      - subgraph
+    environment:
+      - CONFIG_PATH=/etc/router/config.yaml
+      # No GRAPH_API_TOKEN: the router falls back to offline mode,
+      # warns once at startup, and proceeds. execution_config.file
+      # short-circuits the CDN dependency — no token needed for the repro.
+    volumes:
+      - ./router.yaml:/etc/router/config.yaml:ro
+      - ./execution-config.json:/etc/router/execution-config.json:ro
+      - ./services:/etc/router/services:ro
+    ports:
+      - "3002:3002"
+      - "5026:5026"

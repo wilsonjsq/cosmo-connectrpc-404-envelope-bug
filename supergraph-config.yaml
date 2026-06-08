@@ -1,0 +1,7 @@
+version: 1
+
+subgraphs:
+  - name: thing
+    routing_url: http://subgraph:4001/graphql
+    schema:
+      file: ./subgraph.graphql
