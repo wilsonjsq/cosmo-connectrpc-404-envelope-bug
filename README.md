@@ -83,9 +83,7 @@ The custom `writeConnectError` in `vanguard_service.go` is never reached for the
 
 ## Suggested Fix
 
-**This is a change to the [wundergraph/cosmo](https://github.com/wundergraph/cosmo) Router —
-not to vanguard-go (which already ships `WithUnknownHandler` for exactly this purpose) and not
-to the Connect spec (which is the standard being conformed to).**
+**This is a change to the [wundergraph/cosmo](https://github.com/wundergraph/cosmo) Router.**
 
 Two files in `router/pkg/connectrpc/`, ~22 lines, no new dependencies.
 
