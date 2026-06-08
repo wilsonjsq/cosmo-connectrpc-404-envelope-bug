@@ -31,6 +31,8 @@ The [Connect spec](https://connectrpc.com/docs/protocol/#error-codes) states:
 
 ## Reproduce
 
+**Repo:** https://github.com/wilsonjsq/cosmo-connectrpc-404-envelope-bug
+
 Prerequisites: Docker, Node 22, `wgc` (`npm i -g wgc`).
 
 ```sh
