@@ -88,9 +88,13 @@ The custom `writeConnectError` in `vanguard_service.go` is never reached for the
 
 ## Suggested Fix
 
-Two files, ~22 lines, no new dependencies.
+**This is a change to the [wundergraph/cosmo](https://github.com/wundergraph/cosmo) Router —
+not to vanguard-go (which already ships `WithUnknownHandler` for exactly this purpose) and not
+to the Connect spec (which is the standard being conformed to).**
 
-**`connect_util.go`** — add envelope writer:
+Two files in `router/pkg/connectrpc/`, ~22 lines, no new dependencies.
+
+**[`router/pkg/connectrpc/connect_util.go`](https://github.com/wundergraph/cosmo/blob/main/router/pkg/connectrpc/connect_util.go)** — add envelope writer:
 
 ```go
 func WriteConnectErrorEnvelope(w http.ResponseWriter, code connect.Code, msg string) {
@@ -100,7 +104,7 @@ func WriteConnectErrorEnvelope(w http.ResponseWriter, code connect.Code, msg str
 }
 ```
 
-**`server.go`** — pass handler to both `NewTranscoder` call sites:
+**[`router/pkg/connectrpc/server.go`](https://github.com/wundergraph/cosmo/blob/main/router/pkg/connectrpc/server.go)** — pass handler to both `NewTranscoder` call sites (lines 152 and 289):
 
 ```go
 unknownHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -111,7 +115,7 @@ transcoder, err := vanguard.NewTranscoder(vanguardServices,
     vanguard.WithUnknownHandler(unknownHandler))
 ```
 
-`connectrpc.com/connect` is already imported; only `fmt` needs to be added to `connect_util.go`.
+`connectrpc.com/connect` is already imported in `server.go`; only `fmt` needs to be added to `connect_util.go`.
 
 ---
 
