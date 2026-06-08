@@ -42,7 +42,31 @@ node proof.mjs
 docker compose down
 ```
 
-`proof.mjs` exits with **`defect reproduced: YES`** against the current router image.
+`proof.mjs` output against the current router image:
+
+```
+=== ConnectRPC error-envelope proof ===================================
+
+(a) GetStatus — registered method
+    HTTP 200  Content-Type: application/json
+    body: {"status":"OK"}
+
+(b) NonExistentMethod — unknown route
+    HTTP 404  Content-Type: text/plain; charset=utf-8
+    body: 404 page not found
+
+── assertions ─────────────────────────────────────────────────────────
+(a) registered method returns HTTP 200    PASS
+(b) unknown route Content-Type
+    got:      text/plain; charset=utf-8
+    expected: application/json             FAIL
+(b) unknown route body
+    got:      404 page not found
+    expected: {"code":"unimplemented","message":"..."}  FAIL
+(b) SDK can promote to ConnectError
+    got:      e instanceof ConnectError → false
+    expected: true                         FAIL
+```
 
 ---
 
