@@ -12,26 +12,6 @@ Connect SDKs (`connect-es`, etc.) require the JSON envelope to promote the failu
 `ConnectError`; without it the SDK throws an opaque `[unknown] HTTP 404` transport error and
 `e instanceof ConnectError` is `false`.
 
-### Why this is a protocol compliance gap
-
-When a client sends `Connect-Protocol-Version: 1` to `:5026`, it has entered a protocol
-handshake. The server accepted that handshake by binding a Connect handler on that port.
-The [Connect spec](https://connectrpc.com/docs/protocol/#error-codes) states:
-
-> All non-2xx responses **MUST** carry `Content-Type: application/json` and a
-> `{"code":"...","message":"..."}` body.
-
-The spec doesn't carve out an exception for unknown routes — once a port is a Connect server,
-every response it produces is expected to be Connect-shaped. The router correctly rejects the
-request, but because `vanguard.NewTranscoder` falls through to Go's stdlib `http.NotFound` for
-unregistered paths, the rejection is issued *outside* the Connect protocol.
-
-| Scenario | SDK receives | SDK can do |
-|---|---|---|
-| Registered route, business error | `{"code":"..."}` | → typed `ConnectError` |
-| Unregistered route today | `text/plain: 404 page not found` | → opaque `[unknown] HTTP 404` |
-| Unregistered route after fix | `{"code":"unimplemented","message":"..."}` | → typed `ConnectError` |
-
 ---
 
 ## Actual vs. Expected
