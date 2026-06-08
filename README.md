@@ -12,6 +12,11 @@ Connect SDKs (`connect-es`, etc.) require the JSON envelope to promote the failu
 `ConnectError`; without it the SDK throws an opaque `[unknown] HTTP 404` transport error and
 `e instanceof ConnectError` is `false`.
 
+The [Connect spec](https://connectrpc.com/docs/protocol/#error-codes) states:
+
+> All non-2xx responses **MUST** carry `Content-Type: application/json` and a
+> `{"code":"...","message":"..."}` body.
+
 ---
 
 ## Actual vs. Expected
