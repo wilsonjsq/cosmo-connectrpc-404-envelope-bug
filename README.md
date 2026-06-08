@@ -84,7 +84,6 @@ The custom `writeConnectError` in `vanguard_service.go` is never reached for the
 ## Suggested Fix
 
 ```go
-// router/pkg/connectrpc/connect_util.go
 func WriteConnectErrorEnvelope(w http.ResponseWriter, code connect.Code, msg string) {
     w.Header().Set("Content-Type", "application/json")
     w.WriteHeader(ConnectCodeToHTTPStatus(code))
