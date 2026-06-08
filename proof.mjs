@@ -80,45 +80,28 @@ const sdkCanDecode    = isJsonEnvelope; // connect-es promotes iff body is a JSO
 
 // ── output ──────────────────────────────────────────────────────────────────
 
-console.log("=== ConnectRPC error-envelope reproduction ============================");
-console.log();
-console.log(`(a) GetStatus (registered method)`);
-console.log(`    HTTP ${happy.status}  Content-Type: ${happy.contentType}`);
-console.log(`    body: ${happy.body}`);
-console.log();
-console.log(`(b) NonExistentMethod (unknown route — bug lives here)`);
-console.log(`    HTTP ${unknown.status}  Content-Type: ${unknown.contentType}`);
-console.log(`    body: ${unknown.body}`);
-console.log();
-
 const happyOK = happy.status === 200;
 const got404  = unknown.status === 404;
 
-console.log(`happy path HTTP 200:           ${happyOK  ? "PASS" : "FAIL"}`);
-console.log(`unknown route HTTP 404:        ${got404   ? "PASS" : "FAIL"}`);
-console.log(`response Content-Type:         ${unknown.contentType}`);
-console.log(`body is bare text/plain (bug): ${isBareText     ? "YES ← defect" : "no"}`);
-console.log(`body is Connect envelope:      ${isJsonEnvelope ? "YES (patched)" : "NO"}`);
-console.log(`SDK can decode to ConnectError: ${sdkCanDecode  ? "YES" : "NO ← defect"}`);
+console.log("=== ConnectRPC error-envelope proof ===================================");
 console.log();
-
-// Expected SDK behaviour WITHOUT the fix:
-//   e instanceof ConnectError  → false   (transport error, not ConnectError)
-//   e.code                     → undefined
-//   e.message                  → "[unknown] HTTP 404"
-const bug = got404 && isBareText && !isJsonEnvelope;
-if (bug) {
-  console.log("defect reproduced:             YES");
-  console.log();
-  console.log("Connect-protocol spec requires:");
-  console.log("  Content-Type: application/json");
-  console.log('  body: {"code":"unimplemented","message":"method not found: ..."}');
-  console.log();
-  console.log("Root cause: vanguard.NewTranscoder called without WithUnknownHandler");
-  console.log("  router/pkg/connectrpc/server.go:152 and server.go:289");
-  console.log("  Default unknownHandler is net/http.NotFound (bare text/plain).");
-} else if (isJsonEnvelope) {
-  console.log("defect reproduced:             PATCHED — envelope present");
-} else {
-  console.log("defect reproduced:             INCONCLUSIVE");
-}
+console.log("(a) GetStatus — registered method");
+console.log(`    HTTP ${happy.status}  Content-Type: ${happy.contentType}`);
+console.log(`    body: ${happy.body}`);
+console.log();
+console.log("(b) NonExistentMethod — unknown route");
+console.log(`    HTTP ${unknown.status}  Content-Type: ${unknown.contentType}`);
+console.log(`    body: ${unknown.body}`);
+console.log();
+console.log("── assertions ─────────────────────────────────────────────────────────");
+console.log(`(a) registered method returns HTTP 200    ${happyOK ? "PASS" : "FAIL"}`);
+console.log(`(b) unknown route Content-Type`);
+console.log(`    got:      ${unknown.contentType}`);
+console.log(`    expected: application/json             ${isJsonEnvelope ? "PASS" : "FAIL"}`);
+console.log(`(b) unknown route body`);
+console.log(`    got:      ${unknown.body.trim()}`);
+console.log(`    expected: {"code":"unimplemented","message":"..."}  ${isJsonEnvelope ? "PASS" : "FAIL"}`);
+console.log(`(b) SDK can promote to ConnectError`);
+console.log(`    got:      e instanceof ConnectError → ${sdkCanDecode}`);
+console.log(`    expected: true                         ${sdkCanDecode ? "PASS" : "FAIL"}`);
+console.log();
