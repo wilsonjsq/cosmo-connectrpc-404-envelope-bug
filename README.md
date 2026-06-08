@@ -24,12 +24,7 @@ The [Connect spec](https://connectrpc.com/docs/protocol/#error-codes) states:
 The spec doesn't carve out an exception for unknown routes — once a port is a Connect server,
 every response it produces is expected to be Connect-shaped. The router correctly rejects the
 request, but because `vanguard.NewTranscoder` falls through to Go's stdlib `http.NotFound` for
-unregistered paths, the rejection is issued *outside* the Connect protocol. The port made a
-contract it then silently broke.
-
-This sits in a grey area — the spec was written with registered handlers in mind, so calling
-it a hard violation is arguable. But the practical consequence is concrete: **the SDK's typed
-error surface breaks at the exact boundary where a client most needs a clear signal.**
+unregistered paths, the rejection is issued *outside* the Connect protocol.
 
 | Scenario | SDK receives | SDK can do |
 |---|---|---|
