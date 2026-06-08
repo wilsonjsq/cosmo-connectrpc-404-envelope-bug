@@ -83,13 +83,8 @@ The custom `writeConnectError` in `vanguard_service.go` is never reached for the
 
 ## Suggested Fix
 
-**This is a change to the [wundergraph/cosmo](https://github.com/wundergraph/cosmo) Router.**
-
-Two files in `router/pkg/connectrpc/`, ~22 lines, no new dependencies.
-
-**[`router/pkg/connectrpc/connect_util.go`](https://github.com/wundergraph/cosmo/blob/main/router/pkg/connectrpc/connect_util.go)** — add envelope writer:
-
 ```go
+// router/pkg/connectrpc/connect_util.go
 func WriteConnectErrorEnvelope(w http.ResponseWriter, code connect.Code, msg string) {
     w.Header().Set("Content-Type", "application/json")
     w.WriteHeader(ConnectCodeToHTTPStatus(code))
@@ -97,9 +92,8 @@ func WriteConnectErrorEnvelope(w http.ResponseWriter, code connect.Code, msg str
 }
 ```
 
-**[`router/pkg/connectrpc/server.go`](https://github.com/wundergraph/cosmo/blob/main/router/pkg/connectrpc/server.go)** — pass handler to both `NewTranscoder` call sites (lines 152 and 289):
-
 ```go
+// router/pkg/connectrpc/server.go (lines 152 and 289)
 unknownHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
     WriteConnectErrorEnvelope(w, connect.CodeUnimplemented, "method not found: "+r.URL.Path)
 })
@@ -107,8 +101,6 @@ unknownHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) 
 transcoder, err := vanguard.NewTranscoder(vanguardServices,
     vanguard.WithUnknownHandler(unknownHandler))
 ```
-
-`connectrpc.com/connect` is already imported in `server.go`; only `fmt` needs to be added to `connect_util.go`.
 
 ---
 
